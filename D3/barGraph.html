@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<style>
+
+.barA {
+    fill: orange;
+}
+
+.barA:hover{
+    fill: gold;
+}
+
+.barB {
+    fill: blue;
+}
+
+.barB:hover{
+    fill: skyblue;
+}
+
+.barC {
+    fill: green;
+}
+
+.barC:hover{
+    fill: lightgreen;
+}
+
+.barD {
+    fill: purple;
+}
+
+.barD:hover{
+    fill: slateblue;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;}
+
+</style>
+
+<body>
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="d3.legend.js"></script>
+<script>
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 40};
+
+    var width = 1000 - margin.left - margin.right;
+    var height = 500 - margin.top - margin.bottom;
+
+    var heightScale = d3.scale.linear()
+                     .domain([0, 1])
+                     .range([height, 0]);
+
+    var widthScale = d3.scale.ordinal()
+                   .rangeRoundBands([0, width * 0.8], .1);
+
+    var barWidth = 25;
+
+    var xAxis = d3.svg.axis()
+                     .scale(widthScale)
+                     .orient("bottom")
+                     .outerTickSize(8); 
+
+    var yAxis = d3.svg.axis()
+                     .ticks(10)
+                     .orient("left")
+                     .scale(heightScale)
+                     .outerTickSize(8); 
+
+    var canvas = d3.select("body")
+                      .append("svg")
+                      .attr("width", width)
+                      .attr("height", height + 100)
+                      .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+    var tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0)
+                    .style("background-color", "white");
+    
+    d3.csv("data.csv", function(error, data) {
+        if (error) throw error
+
+        widthScale.domain(data.map(function(d) { return d.index; }));  
+
+        canvas.append("g")
+              .attr("class", "y axis")
+              .call(yAxis)
+               .append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 10)
+                  .attr("x", 0)
+                  .attr("dy", "1em")
+                  .style("text-anchor", "end")
+                  .text("Value")
+                  .attr("font-size", "16px");
+
+        canvas.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0, " + height + ")")
+              .call(xAxis);
+
+
+        var barA = canvas.selectAll(".bar")
+                   .data(data)
+                   .enter()
+                       .append("rect")
+                       .attr("class", "barA")
+                       .attr("height", function(d) {return height - heightScale(d.A); })
+                       .attr("width", barWidth)
+                       .attr("x", function(d) { return widthScale(d.index); })
+                       .attr("y", function(d) { return heightScale(d.A)})
+                       .attr("data-legend", "A")
+                       .on("mouseover", function(d) { //much like jquery, an event listener
+                             tooltip.transition()
+                                    .duration(200)
+                                    .style("opacity", .9);
+                             tooltip.html("A" + " at " + d.index + " : " + d.A)
+                                   .style("left", (d3.event.pageX + 5) + "px")
+                                   .style("top", (d3.event.pageY - 28) + "px");
+                          })
+                          .on("mouseout", function(d) {
+                              tooltip.transition()
+                                   .duration(1000)
+                                   .style("opacity", 0);
+                        });
+
+        var barB = canvas.selectAll(".bar")
+                   .data(data)
+                   .enter()
+                       .append("rect")
+                       .attr("class", "barB")
+                       .attr("height", function(d) {return height - heightScale(d.B); })
+                       .attr("width", barWidth)
+                       .attr("x", function(d) { return widthScale(d.index) + barWidth; })
+                       .attr("y", function(d) { return heightScale(d.B); })
+                       .attr("data-legend", "B")
+                       .on("mouseover", function(d) { 
+                             tooltip.transition()
+                                    .duration(200)
+                                    .style("opacity", .9);
+                             tooltip.html("B" + " at " + d.index + " : " + d.B)
+                                   .style("left", (d3.event.pageX + 5) + "px")
+                                   .style("top", (d3.event.pageY - 28) + "px");
+                          })
+                          .on("mouseout", function(d) {
+                              tooltip.transition()
+                                   .duration(1000)
+                                   .style("opacity", 0)
+                        });
+
+        var barC = canvas.selectAll(".bar")
+                   .data(data)
+                   .enter()
+                       .append("rect")
+                       .attr("class", "barC")
+                       .attr("height", function(d) {return height - heightScale(d.C); })
+                       .attr("width", barWidth)
+                       .attr("x", function(d) { return widthScale(d.index) + 2 * barWidth; })
+                       .attr("y", function(d) { return heightScale(d.C); })
+                       .attr("data-legend", "C")
+                       .on("mouseover", function(d) { 
+                             tooltip.transition()
+                                    .duration(200)
+                                    .style("opacity", .9);
+                             tooltip.html("C" + " at " + d.index + " : " + d.C)
+                                   .style("left", (d3.event.pageX + 5) + "px")
+                                   .style("top", (d3.event.pageY - 28) + "px");
+                          })
+                          .on("mouseout", function(d) {
+                              tooltip.transition()
+                                   .duration(1000)
+                                   .style("opacity", 0)
+                        });
+
+        var barD = canvas.selectAll(".bar")
+                   .data(data)
+                   .enter()
+                       .append("rect")
+                       .attr("class", "barD")
+                       .attr("height", function(d) {return height - heightScale(d.D); })
+                       .attr("width", barWidth)
+                       .attr("x", function(d) { return widthScale(d.index) + 3 * barWidth; })
+                       .attr("y", function(d) { return heightScale(d.D); })
+                       .attr("data-legend", "D")
+                       .on("mouseover", function(d) { 
+                             tooltip.transition()
+                                    .duration(200)
+                                    .style("opacity", .9);
+                             tooltip.html("D" + " at " + d.index + " : " + d.D)
+                                   .style("left", (d3.event.pageX + 5) + "px")
+                                   .style("top", (d3.event.pageY - 28) + "px");
+                          })
+                          .on("mouseout", function(d) {
+                              tooltip.transition()
+                                   .duration(1000)
+                                   .style("opacity", 0)
+                        });
+
+        legend = canvas.append("g")
+                    .attr("class","legend")
+                    .attr("transform","translate(200,20)")
+                    .style("font-size","12px")
+                    .call(d3.legend)
+                                         
+        });
+
+</script>
+</body>
+</html>
